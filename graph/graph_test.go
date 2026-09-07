@@ -68,6 +68,38 @@ func TestIncomingVertices(t *testing.T) {
 	}
 }
 
+func TestIncomingDegree(t *testing.T) {
+	g := New[int, string]()
+
+	g.AddEdge("1-2", 1, 2)
+	g.AddEdge("3-2", 3, 2)
+	if got := g.IncomingDegree(1); got != 0 {
+		t.Errorf("expected number of edges to be 2, got %v", got)
+	}
+	if got := g.IncomingDegree(2); got != 2 {
+		t.Errorf("expected number of edges to be 2, got %v", got)
+	}
+	if got := g.IncomingDegree(3); got != 0 {
+		t.Errorf("expected number of edges to be 2, got %v", got)
+	}
+}
+
+func TestOutgoingDegree(t *testing.T) {
+	g := New[int, string]()
+
+	g.AddEdge("1-2", 1, 2)
+	g.AddEdge("3-2", 3, 2)
+	if got := g.OutgoingDegree(1); got != 1 {
+		t.Errorf("expected number of edges to be 2, got %v", got)
+	}
+	if got := g.OutgoingDegree(2); got != 0 {
+		t.Errorf("expected number of edges to be 2, got %v", got)
+	}
+	if got := g.OutgoingDegree(3); got != 1 {
+		t.Errorf("expected number of edges to be 2, got %v", got)
+	}
+}
+
 type mockEdge struct {
 	Vertex int
 	Label  string

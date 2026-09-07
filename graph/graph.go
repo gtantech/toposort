@@ -5,8 +5,10 @@ import (
 )
 
 type Graph[V comparable, E any] interface {
+	OutgoingDegree(vertex V) int
 	OutgoingVertices(vertex V) func(yield func(V) bool)
 	OutgoingVerticesWithEdge(vertex V) func(yield func(V, E) bool)
+	IncomingDegree(vertex V) int
 	IncomingVertices(vertex V) func(yield func(V) bool)
 	IncomingVerticesWithEdge(vertex V) func(yield func(V, E) bool)
 	Vertices() func(yield func(V) bool)
@@ -23,6 +25,18 @@ type dag[V comparable, E any] struct {
 	outgoingVertices  map[V]map[V]E //maps the origin vertex, then destination vertex to the edge value
 	incomingVerticies map[V]map[V]E //maps the destination vertex, then origin vertex to the edge value
 	uniqueVerticies   map[V]struct{}
+}
+
+// IncomingDegree implements [Graph].
+func (d *dag[V, E]) IncomingDegree(v V) int {
+	destinations := d.incomingVerticies[v]
+	return len(destinations)
+}
+
+// OutgoingDegree implements [Graph].
+func (d *dag[V, E]) OutgoingDegree(v V) int {
+	destinations := d.outgoingVertices[v]
+	return len(destinations)
 }
 
 // IncomingVerticesWithEdge implements [Graph].
