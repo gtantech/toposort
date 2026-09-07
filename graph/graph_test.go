@@ -68,6 +68,67 @@ func TestIncomingVertices(t *testing.T) {
 	}
 }
 
+type mockEdge struct {
+	Vertex int
+	Label  string
+}
+
+func TestIncomingVerticesWithEdge(t *testing.T) {
+	g := New[int, string]()
+	g.AddEdge("1-2", 1, 2)
+	g.AddEdge("3-2", 3, 2)
+	edge1 := mockEdge{Vertex: 1, Label: "1-2"}
+	edge2 := mockEdge{Vertex: 3, Label: "3-2"}
+	edges := slices.Collect(func(yield func(mockEdge) bool) {
+		g.IncomingVerticesWithEdge(2)(func(v int, label string) bool {
+			if v == 1 && label == "1-2" {
+				return yield(edge1)
+			}
+			if v == 3 && label == "3-2" {
+				return yield(edge2)
+			}
+			t.Fatalf("unexpected vertex")
+			return yield(mockEdge{})
+		})
+	})
+
+	if got := len(edges); got != 2 {
+		t.Errorf("expected number of edges to be 2, got %v", got)
+	}
+
+	if got := edges; !(slices.Contains(got, edge1) && slices.Contains(got, edge2) && len(got) == 2) {
+		t.Errorf("unexpected edge, got %v", got)
+	}
+}
+
+func TestOutgoingVerticesWithEdge(t *testing.T) {
+	g := New[int, string]()
+	g.AddEdge("2-1", 2, 1)
+	g.AddEdge("2-3", 2, 3)
+	edge1 := mockEdge{Vertex: 1, Label: "2-1"}
+	edge2 := mockEdge{Vertex: 3, Label: "2-3"}
+	edges := slices.Collect(func(yield func(mockEdge) bool) {
+		g.OutgoingVerticesWithEdge(2)(func(v int, label string) bool {
+			if v == 1 && label == "2-1" {
+				return yield(edge1)
+			}
+			if v == 3 && label == "2-3" {
+				return yield(edge2)
+			}
+			t.Fatalf("unexpected vertex")
+			return yield(mockEdge{})
+		})
+	})
+
+	if got := len(edges); got != 2 {
+		t.Errorf("expected number of edges to be 2, got %v", got)
+	}
+
+	if got := edges; !(slices.Contains(got, edge1) && slices.Contains(got, edge2) && len(got) == 2) {
+		t.Errorf("unexpected edge, got %v", got)
+	}
+}
+
 func TestAddSameOriginEdges(t *testing.T) {
 	g := New[int, string]()
 

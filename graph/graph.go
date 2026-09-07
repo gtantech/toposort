@@ -6,7 +6,9 @@ import (
 
 type Graph[V comparable, E any] interface {
 	OutgoingVertices(vertex V) func(yield func(V) bool)
+	OutgoingVerticesWithEdge(vertex V) func(yield func(V, E) bool)
 	IncomingVertices(vertex V) func(yield func(V) bool)
+	IncomingVerticesWithEdge(vertex V) func(yield func(V, E) bool)
 	Vertices() func(yield func(V) bool)
 	AddVertex(v V)
 	RemoveVertex(v V)
@@ -21,6 +23,20 @@ type dag[V comparable, E any] struct {
 	outgoingVertices  map[V]map[V]E //maps the origin vertex, then destination vertex to the edge value
 	incomingVerticies map[V]map[V]E //maps the destination vertex, then origin vertex to the edge value
 	uniqueVerticies   map[V]struct{}
+}
+
+// IncomingVerticesWithEdge implements [Graph].
+func (d *dag[V, E]) IncomingVerticesWithEdge(v V) func(yield func(V, E) bool) {
+	destinations := d.incomingVerticies[v]
+
+	return maps.All(destinations)
+}
+
+// OutgoingVerticesWithEdge implements [Graph].
+func (d *dag[V, E]) OutgoingVerticesWithEdge(v V) func(yield func(V, E) bool) {
+	destinations := d.outgoingVertices[v]
+
+	return maps.All(destinations)
 }
 
 func New[V comparable, E any]() Graph[V, E] {
